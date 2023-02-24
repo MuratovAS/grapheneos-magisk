@@ -1,0 +1,24 @@
+version: '3' 
+
+networks:
+  internet:
+    external: true
+  proxy-untrusted:
+    external: true
+  proxy:
+    external: true
+  backend:
+    internal: true
+
+services: 
+  app: 
+    image: mohamnag/nginx-file-browser
+    container_name: avbroot-frontend
+    restart: always
+#    ports: 
+#      - 8080:80
+    volumes: 
+      - ./ota:/opt/www/files/
+    networks:
+      - internet
+      - proxy-untrusted
