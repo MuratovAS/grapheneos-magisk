@@ -79,3 +79,5 @@ fi
 # Image Patch
 TAG=$(echo $TARGET | sed "s/\..*//")
 docker run --rm -e TARGET="$TAG" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
+
+chmod 555 $SCRIPTPATH/ota
