@@ -2,9 +2,21 @@
 SCRIPT=$(readlink -f $0)
 SCRIPTPATH=`dirname $SCRIPT`
 
+#ID=panther
+
+# Directory initialization.
+cd $SCRIPTPATH
+mkdir -p ota
+mkdir -p tmp
+mkdir -p crt
+cd -
+
 # Autodelete of old versions.
 find $SCRIPTPATH/ota -type f -mtime +90 -delete
 find $SCRIPTPATH/ota -type d -empty -exec rmdir {} \;
+cd $SCRIPTPATH
+mkdir -p ota
+cd -
 
 # Checking for an docker image
 if docker images | grep "avbroot" ; then
@@ -13,13 +25,6 @@ else
 	echo "Build docker-avbroot"; 
 	docker build -t avbroot $SCRIPTPATH/docker
 fi
-
-# Directory initialization.
-cd $SCRIPTPATH
-mkdir -p ota
-mkdir -p tmp
-mkdir -p crt
-cd -
 
 # Search for a new version grapheneos.
 if [ -n $ID ] ; then
@@ -39,12 +44,14 @@ TARGET=$(curl -s  https://grapheneos.org/releases \
 
 echo "Last version: $TARGET"
 
-if [ ! -f $SCRIPTPATH/ota/$TARGET ]; then
-    curl -o $SCRIPTPATH/ota/$TARGET.original https://releases.grapheneos.org/$TARGET
+cd $SCRIPTPATH/ota
+if ! [ -f "$TARGET" ]; then
+    curl -o $TARGET.original https://releases.grapheneos.org/$TARGET
 else
 	echo "There are no updates."; 
 	exit
 fi
+cd -
 
 # Magisk updates.
 cd $SCRIPTPATH
@@ -59,7 +66,7 @@ cd -
 
 cd $SCRIPTPATH/tmp
 rm -f magisk.apk
-../ghrd -x -a  'Magisk-.*.apk'  topjohnwu/Magisk
+$SCRIPTPATH/ghrd -x -a  'Magisk-.*.apk'  topjohnwu/Magisk
 mv Magisk-*.apk magisk.apk
 cd -
 
@@ -71,4 +78,4 @@ fi
 
 # Image Patch
 TAG=$(echo $TARGET | sed "s/\..*//")
-docker run --rm -e TARGET="$TAG" -v $SCRIPTPATH/crt:/avbroot/crt -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp avbroot
+docker run --rm -e TARGET="$TAG" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot

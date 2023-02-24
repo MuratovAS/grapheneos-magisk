@@ -10,11 +10,13 @@ How it works:
 - Extract `img`
 - Publication
 
+tested on: Arch, Alpine
+
 ## Usage
 
 Required dependencies:
 ```
-docker curl
+docker curl jq bash
 ```
 
 The first start is carried out manually. Certificates are created.
