@@ -1,6 +1,7 @@
 # grapheneos-magisk
 
 A small project implementing an update server for `GrapheneOS` with support for `Magisk`. Based on `avbroot`.
+
 How it works:
 - Generate certificates (first run)
 - Download the latest `OTA ROM` for the given device ID (scheduled)
@@ -30,3 +31,9 @@ Search for new versions of grapheneos. Add a task to `crontab -e`
 ```bash
 20		*/6		*		*		*	/path-to-file/grapheneos-magisk/auto.sh
 ```
+## TODO:
+
+- [ ] Rebuild mobile [app](https://github.com/GrapheneOS/platform_packages_apps_Updater)
+
+## Credits
+...
