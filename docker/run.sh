@@ -22,3 +22,6 @@ extract \
 
 python3 clearotacerts/build.py
 cp clearotacerts/dist/clearotacerts-*.zip ota/$TARGET/clearotacerts.zip
+
+chown -R $UID_C:$GID_C ota
+chmod -R 755 ota

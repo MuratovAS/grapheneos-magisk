@@ -15,3 +15,6 @@ python3 external/avb/avbtool.py \
 cd /avbroot
 read -p 'Password: ' passvar
 printf '%s\n%s' "$passvar" "$passvar" > crt/key.txt
+
+chown -R $UID_C:$GID_C crt
+chmod -R 755 crt

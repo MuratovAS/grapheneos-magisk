@@ -2,60 +2,54 @@
 SCRIPT=$(readlink -f $0)
 SCRIPTPATH=`dirname $SCRIPT`
 
-#ID=panther
+# Settings
+if [ -v $ID ] ; then
+	ID=panther
+	CHANNEL=stable
+	TYPE=ota_update
+	echo "Target default: $ID-$CHANNEL ($TYPE)";
+else
+	echo "Target custom: $ID-$CHANNEL ($TYPE)"; 
+fi
 
 # Directory initialization.
-cd $SCRIPTPATH
-mkdir -p ota
-mkdir -p tmp
-mkdir -p crt
-cd -
+mkdir -p $SCRIPTPATH/ota
+mkdir -p $SCRIPTPATH/tmp
+mkdir -p $SCRIPTPATH/crt
+echo "Run: $(date)" > $SCRIPTPATH/ota/info
 
 # Autodelete of old versions.
 find $SCRIPTPATH/ota -type f -mtime +90 -delete
 find $SCRIPTPATH/ota -type d -empty -exec rmdir {} \;
-cd $SCRIPTPATH
-mkdir -p ota
-cd -
 
 # Checking for an docker image
 if docker images | grep "avbroot" ; then
-	echo "docker-avbroot installed"; 
+	echo "Found docker-avbroot"; 
 else
 	echo "Build docker-avbroot"; 
-	docker build -t avbroot $SCRIPTPATH/docker
+	docker build --build-arg UID="$(id -u)" --build-arg GID="$(id -g)" --build-arg UNAME="$(whoami)" -t avbroot $SCRIPTPATH/docker
 fi
 
 # Search for a new version grapheneos.
-if [ -n $ID ] ; then
-	echo "Target name: $ID"; 
-else
-	echo "Target name: NULL";
-	exit;
-fi
-
-TYPE=ota
-
-TARGET=$(curl -s  https://grapheneos.org/releases \
-	| grep -o -P '(?<=https://releases.grapheneos.org/).*?(?=>)' \
-	| grep "$TYPE" \
-	| grep "$ID" \
-	| head -n 1)
-
+URL="https://releases.grapheneos.org"
+VERSION=$(curl -s $URL/$ID-$CHANNEL | head -n1 | awk '{print $1;}')
+TARGET="$ID-$TYPE-$VERSION"
 echo "Last version: $TARGET"
 
+# Download new version grapheneos.
 cd $SCRIPTPATH/ota
-if ! [ -f "$TARGET" ]; then
-    curl -o $TARGET.original https://releases.grapheneos.org/$TARGET
+if ! [ -f "$TARGET.zip.original" ]; then
+    curl -o $TARGET.zip.original $URL/$TARGET.zip
+    curl -o $ID-$CHANNEL $URL/$ID-$CHANNEL
 else
-	echo "There are no updates."; 
+	echo "There are no updates"; 
 	exit
 fi
 cd -
 
 # Magisk updates.
 cd $SCRIPTPATH
-if [ ! -f $SCRIPTPATH/ghrd ]; then
+if ! [ -f "$SCRIPTPATH/ghrd" ]; then
 	echo "Download GHRD"; 
 	GHRD="/zero88/gh-release-downloader"
 	GHRD_VERSION=$(curl "https://github.com/$GHRD/releases/latest" -s -L -I -o /dev/null -w '%{url_effective}' | sed -n '{s@.*/@@; p}')
@@ -63,7 +57,6 @@ if [ ! -f $SCRIPTPATH/ghrd ]; then
 	curl -L "$GHRD_FILE" > "$SCRIPTPATH/ghrd" && chmod +x "$SCRIPTPATH/ghrd"
 fi
 cd -
-
 cd $SCRIPTPATH/tmp
 rm -f magisk.apk
 $SCRIPTPATH/ghrd -x -a  'Magisk-.*.apk'  topjohnwu/Magisk
@@ -71,13 +64,12 @@ mv Magisk-*.apk magisk.apk
 cd -
 
 # Key generation
-if [ ! -f $SCRIPTPATH/crt/avb_pkmd.bin ]; then
-	echo "Certificates not found. Creation of certificates."; 
-	docker run --rm  -it --entrypoint /init.sh -v $SCRIPTPATH/crt:/avbroot/crt avbroot
+if ! [ -f "$SCRIPTPATH/crt/avb_pkmd.bin" ]; then
+	echo "Creation certificates"; 
+	docker run --rm -e UID_C="$(id -u)" -e GID_C="$(id -g)"  -it --entrypoint /init.sh -v $SCRIPTPATH/crt:/avbroot/crt avbroot
+else
+	echo "Found certificates"; 
 fi
 
 # Image Patch
-TAG=$(echo $TARGET | sed "s/\..*//")
-docker run --rm -e TARGET="$TAG" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
-
-chmod 555 $SCRIPTPATH/ota
+docker run --rm -e UID_C="$(id -u)" -e GID_C="$(id -g)" -e TARGET="$TARGET" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
