@@ -2,6 +2,9 @@
 
 A small project implementing an update server for `GrapheneOS` with support for `Magisk`. Based on `avbroot`.
 
+!!!
+At the moment, it can only be used as a repository of modified roms. Updating via the standard app is not possible. The problem arose from the inability to apply `avbroot` to `$ID-incremental-2023021000-2023022300.zip`
+
 How it works:
 - Generate certificates (first run)
 - Download the latest `OTA ROM` for the given device ID (scheduled)
@@ -39,6 +42,8 @@ Search for new versions of grapheneos. Add a task to `crontab -e`
 ```
 
 ## Usage device
+
+DOES NOT WORK
 
 Now a rather complicated way of integrating the server with the phone is used. It is implemented by replacing the server.
 
