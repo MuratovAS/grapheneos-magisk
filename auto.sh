@@ -24,9 +24,9 @@ find $SCRIPTPATH/ota -type d -empty -exec rmdir {} \;
 
 # Checking for an docker image
 if docker images | grep "avbroot" ; then
-	echo "Found docker-avbroot"; 
+	echo "Found avbroot (docker)"; 
 else
-	echo "Build docker-avbroot"; 
+	echo "Build avbroot (docker)"; 
 	docker build --build-arg UID="$(id -u)" --build-arg GID="$(id -g)" --build-arg UNAME="$(whoami)" -t avbroot $SCRIPTPATH/docker
 fi
 
