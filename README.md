@@ -15,13 +15,13 @@ tested on: Arch, Alpine
 ## Usage
 
 Required dependencies:
-```
+```bash
 docker curl jq bash
 ```
 
 The first start is carried out manually. Certificates are created.
 ```bash
-ID=panther ./auto.sh
+./auto.sh
 ```
 or
 ```bash
@@ -40,9 +40,46 @@ Search for new versions of grapheneos. Add a task to `crontab -e`
 
 ## Usage device
 
-- [ ] Rebuild mobile [app](https://github.com/GrapheneOS/platform_packages_apps_Updater)
+Now a rather complicated way of integrating the server with the phone is used. It is implemented by replacing the server.
+
+### Server
+`avbroot-frontend` needs to implement TLS and respond to the `releases.grapheneos.org` domain. I solve it by means of `nginx proxy manager`.
+
+You will need a self-signed certificate for this. This can be done like this:
+```bash
+openssl req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout RootCA.key -out RootCA.pem -subj "/C=RU/CN=Custom-Root-CA"
+openssl x509 -outform pem -in RootCA.pem -out RootCA.crt
+
+openssl genrsa -out local.key 2048
+openssl req -new -nodes -key local.key -sha256 -out local.csr  -subj "/C=US/ST=Custom/L=Custom/O=local-Certificates/CN=local" -days 3650
+openssl x509 -req -sha256 -days 3650 -in local.csr -CA RootCA.pem -CAkey RootCA.key -CAcreateserial -extfile domains.ext -out local.crt
+```
+
+You will also need the file `domains.ext`
+```bash
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = releases.grapheneos.org
+```
+### Device
+
+You need to change the `IP` for releases.grapheneos.org. This can be done using `DNS Server` or `hosts`. Let's consider the second way.
+
+In the `magisk` settings, enable the `systemless-hosts` mode. after that, in the file `/ets/hosts` we will write the `IP` of your server.
+```text
+192.168.1.10 releases.grapheneos.org
+```
+
+but, this is not enough. You must trust your certificate. Add the user certificate `RootCA.crt` in the system settings.
+It is worth noting that the application does not trust user CA. It needs to be made systemic. I use [MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts) for this.
+
+Congratulations. Now you can receive updates automatically.
 
 ## TODO:
 
 - [ ] web file viewer
 - [ ] update documentation
+- [ ] magisk module
