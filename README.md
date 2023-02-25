@@ -72,6 +72,7 @@ In the `magisk` settings, enable the `systemless-hosts` mode. after that, in the
 ```text
 192.168.1.10 releases.grapheneos.org
 ```
+NOTE: there must be an empty line at the end of the file !!!
 
 but, this is not enough. You must trust your certificate. Add the user certificate `RootCA.crt` in the system settings.
 It is worth noting that the application does not trust user CA. It needs to be made systemic. I use [MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts) for this.
