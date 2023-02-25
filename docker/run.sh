@@ -15,13 +15,12 @@ patch \
 --cert-ota crt/ota.crt \
 --magisk tmp/magisk.apk < crt/key.txt
 
-python3 avbroot.py \
-extract \
---input ota/$TARGET.zip \
---directory ota/$TARGET
-
-python3 clearotacerts/build.py
-cp clearotacerts/dist/clearotacerts-*.zip ota/$TARGET/clearotacerts.zip
+if [ $EXTRACT = "1" ] ; then
+	python3 avbroot.py \
+	extract \
+	--input ota/$TARGET.zip \
+	--directory ota/$TARGET
+fi
 
 chown -R $UID_C:$GID_C ota
 chmod -R 755 ota

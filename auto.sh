@@ -3,14 +3,18 @@ SCRIPT=$(readlink -f $0)
 SCRIPTPATH=`dirname $SCRIPT`
 
 # Settings
+TYPE=ota_update
 if [ -v $ID ] ; then
 	ID=panther
-	CHANNEL=stable
-	TYPE=ota_update
-	echo "Target default: $ID-$CHANNEL ($TYPE)";
-else
-	echo "Target custom: $ID-$CHANNEL ($TYPE)"; 
 fi
+if [ -v $CHANNEL ] ; then
+	CHANNEL=stable
+fi
+if [ -v $EXTRACT ] ; then
+	EXTRACT=0
+fi
+
+echo "Target custom: $ID-$CHANNEL ($TYPE)"; 
 
 # Directory initialization.
 mkdir -p $SCRIPTPATH/ota
@@ -38,7 +42,7 @@ echo "Last version: $TARGET"
 
 # Download new version grapheneos.
 cd $SCRIPTPATH/ota
-if ! [ -f "$TARGET.zip.original" ]; then
+if ! [ -f "$TARGET.zip" ]; then
     curl -o $TARGET.zip.original $URL/$TARGET.zip
     curl -o $ID-$CHANNEL $URL/$ID-$CHANNEL
 else
@@ -72,4 +76,5 @@ else
 fi
 
 # Image Patch
-docker run --rm -e UID_C="$(id -u)" -e GID_C="$(id -g)" -e TARGET="$TARGET" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
+docker run --rm -e UID_C="$(id -u)" -e EXTRACT=$EXTRACT -e GID_C="$(id -g)" -e TARGET="$TARGET" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
+rm $SCRIPTPATH/ota/$TARGET.zip.original

@@ -2,8 +2,7 @@
 
 A small project implementing an update server for `GrapheneOS` with support for `Magisk`. Based on `avbroot`.
 
-!!!
-At the moment, it can only be used as a repository of modified roms. Updating via the standard app is not possible. The problem arose from the inability to apply `avbroot` to `$ID-incremental-2023021000-2023022300.zip`
+!!! The author disclaims responsibility. Everything you do you do on your own at your own peril and risk.
 
 How it works:
 - Generate certificates (first run)
@@ -43,7 +42,9 @@ Search for new versions of grapheneos. Add a task to `crontab -e`
 
 ## Usage device
 
-DOES NOT WORK
+WORKS NOT STABLE. `incremental OTA` is not currently supported.
+
+TODO: some problems with certificates
 
 Now a rather complicated way of integrating the server with the phone is used. It is implemented by replacing the server.
 
@@ -81,6 +82,13 @@ NOTE: there must be an empty line at the end of the file !!!
 
 but, this is not enough. You must trust your certificate. Add the user certificate `RootCA.crt` in the system settings.
 It is worth noting that the application does not trust user CA. It needs to be made systemic. I use [MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts) for this.
+
+You will need to make a magisk module with your certificate to replace `clearotacerts.zip`
+```bash
+openssl x509 -in ota.crt -out ota.pem -outform PEM
+```
+
+IMPORTANT!!! Be sure to flush the cache and storage of the `system update` application. Also freeze it in all profiles except the main one.
 
 Congratulations. Now you can receive updates automatically.
 
