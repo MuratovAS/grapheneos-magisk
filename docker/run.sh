@@ -2,9 +2,6 @@
 
 cd /avbroot
 
-mkdir -p ota/$TARGET
-
-cp crt/avb_pkmd.bin ota/$TARGET/avb_pkmd.bin
 
 python3 avbroot.py \
 patch \
@@ -16,6 +13,8 @@ patch \
 --magisk tmp/magisk.apk < crt/key.txt
 
 if [ $EXTRACT = "1" ] ; then
+	mkdir -p ota/$TARGET
+	cp crt/avb_pkmd.bin ota/$TARGET/avb_pkmd.bin
 	python3 avbroot.py \
 	extract \
 	--input ota/$TARGET.zip \
