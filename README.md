@@ -4,6 +4,8 @@ A small project implementing an update server for `GrapheneOS` with support for 
 
 !!! The author disclaims responsibility. Everything you do you do on your own at your own peril and risk.
 
+`incremental OTA` is not currently supported.
+
 How it works:
 - Generate certificates (first run)
 - Download the latest `OTA ROM` for the given device ID (scheduled)
@@ -42,9 +44,7 @@ Search for new versions of grapheneos. Add a task to `crontab -e`
 
 ## Usage device
 
-WORKS NOT STABLE. `incremental OTA` is not currently supported.
-
-TODO: some problems with certificates
+NOTE: still a lot of bugs
 
 Now a rather complicated way of integrating the server with the phone is used. It is implemented by replacing the server.
 
@@ -71,8 +71,8 @@ subjectAltName = @alt_names
 DNS.1 = releases.grapheneos.org
 ```
 ### Device
-
-You need to change the `IP` for releases.grapheneos.org. This can be done using `DNS Server` or `hosts`. Let's consider the second way.
+#### Forwarding
+You need to change the `IP` for releases.grapheneos.org. This can be done using `DNS Server`(local use) or `hosts file`. Let's consider the second way.
 
 In the `magisk` settings, enable the `systemless-hosts` mode. after that, in the file `/ets/hosts` we will write the `IP` of your server.
 ```text
@@ -80,12 +80,19 @@ In the `magisk` settings, enable the `systemless-hosts` mode. after that, in the
 ```
 NOTE: there must be an empty line at the end of the file !!!
 
+#### Trust connection
+
 but, this is not enough. You must trust your certificate. Add the user certificate `RootCA.crt` in the system settings.
 It is worth noting that the application does not trust user CA. It needs to be made systemic. I use [MagiskTrustUserCerts](https://github.com/NVISOsecurity/MagiskTrustUserCerts) for this.
 
-You will need to make a magisk module with your certificate to replace `clearotacerts.zip`
+#### Trust OTA
+
+To replace `clearotacerts.zip` we need magisk module with our certificate.
+Copy `ota.crt` to `otacerts/ota.crt`.
+
+Execute the script and install the resulting module on your device.
 ```bash
-openssl x509 -in ota.crt -out ota.pem -outform PEM
+python3 build.py
 ```
 
 IMPORTANT!!! Be sure to flush the cache and storage of the `system update` application. Also freeze it in all profiles except the main one.
