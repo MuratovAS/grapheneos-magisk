@@ -1,5 +1,6 @@
-crt
-ota
-ota.crt
 tmp
+ota
 ghrd
+otacerts/dist/
+otacerts/ota.crt
+crt

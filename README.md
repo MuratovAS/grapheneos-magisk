@@ -101,6 +101,6 @@ Congratulations. Now you can receive updates automatically.
 
 ## TODO:
 
-- [ ] web file viewer
+- [x] web explorer
 - [ ] update documentation
-- [ ] magisk module
+- [ ] ~~magisk module~~

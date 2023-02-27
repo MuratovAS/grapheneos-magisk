@@ -13,15 +13,13 @@ networks:
 services: 
   app: 
     image: nginx
-    #image: nginx-file-browser
-    #image: mohamnag/nginx-file-browser
     container_name: avbroot-frontend
     restart: always
 #    ports: 
 #      - 8080:80
-    volumes: 
-      #- ./ota:/opt/www/files/:ro
+    volumes:
       - ./ota:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - internet
       - proxy-untrusted
