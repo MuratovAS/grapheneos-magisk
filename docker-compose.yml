@@ -21,5 +21,4 @@ services:
       - ./ota:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
-      - internet
-      - proxy-untrusted
+      - proxy
