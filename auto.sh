@@ -52,19 +52,8 @@ fi
 cd -
 
 # Magisk updates.
-cd $SCRIPTPATH
-if ! [ -f "$SCRIPTPATH/ghrd" ]; then
-	echo "Download GHRD"; 
-	GHRD="/zero88/gh-release-downloader"
-	GHRD_VERSION=$(curl "https://github.com/$GHRD/releases/latest" -s -L -I -o /dev/null -w '%{url_effective}' | sed -n '{s@.*/@@; p}')
-	GHRD_FILE="https://github.com/$GHRD/releases/download/$GHRD_VERSION/ghrd"
-	curl -L "$GHRD_FILE" > "$SCRIPTPATH/ghrd" && chmod +x "$SCRIPTPATH/ghrd"
-fi
-cd -
 cd $SCRIPTPATH/tmp
-rm -f magisk.apk
-$SCRIPTPATH/ghrd -x -a  'Magisk-.*.apk'  topjohnwu/Magisk
-mv Magisk-*.apk magisk.apk
+curl -s https://api.github.com/repos/topjohnwu/Magisk/releases/latest | jq -r '.assets[] | select(.name | contains ("Magisk")) | .browser_download_url' | xargs curl -o magisk.apk -L
 cd -
 
 # Key generation
