@@ -18,7 +18,6 @@ echo "Target custom: $ID-$CHANNEL ($TYPE)";
 
 # Directory initialization.
 mkdir -p $SCRIPTPATH/ota
-mkdir -p $SCRIPTPATH/tmp
 mkdir -p $SCRIPTPATH/crt
 echo "Run: $(date)" > $SCRIPTPATH/ota/info
 
@@ -44,16 +43,10 @@ echo "Last version: $TARGET"
 cd $SCRIPTPATH/ota
 if ! [ -f "$TARGET.zip" ]; then
     curl -o $TARGET.zip.original $URL/$TARGET.zip
-    curl -o $ID-$CHANNEL $URL/$ID-$CHANNEL
 else
 	echo "There are no updates"; 
 	exit
 fi
-cd -
-
-# Magisk updates.
-cd $SCRIPTPATH/tmp
-curl -s https://api.github.com/repos/topjohnwu/Magisk/releases/latest | jq -r '.assets[] | select(.name | contains ("Magisk")) | .browser_download_url' | xargs curl -o magisk.apk -L
 cd -
 
 # Key generation
@@ -65,5 +58,13 @@ else
 fi
 
 # Image Patch
-docker run --rm -e UID_C="$(id -u)" -e EXTRACT=$EXTRACT -e GID_C="$(id -g)" -e TARGET="$TARGET" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota -v $SCRIPTPATH/tmp:/avbroot/tmp:ro avbroot
+docker run --rm -e UID_C="$(id -u)" -e EXTRACT=$EXTRACT -e GID_C="$(id -g)" -e TARGET="$TARGET" -v $SCRIPTPATH/crt:/avbroot/crt:ro -v $SCRIPTPATH/ota:/avbroot/ota avbroot
 rm $SCRIPTPATH/ota/$TARGET.zip.original
+
+# Image check
+cd $SCRIPTPATH/ota
+if [ -f "$TARGET.zip" ]; then
+    curl -o $ID-$CHANNEL $URL/$ID-$CHANNEL
+	echo "Success!"; 
+fi
+cd -
