@@ -1,5 +1,20 @@
 # grapheneos-magisk
 
+Status:
+Last successfully built version: `panther-ota_update-2023041100.zip`
+
+If you are using `Magisk version >=25211`, you need to know the preinit partition name.
+
+This makes your server tied to one machine. There is a question about the relevance of this project.
+
+For further use you need:
+- Fix dockerfile, you need to update the system.
+- Add support for `--magisk-preinit-device` flag
+- Add `oemunlockonboot` support
+- Come up with a system for downloading `magisk.apk`
+
+---
+
 A small project implementing an update server for `GrapheneOS` with support for `Magisk`. Based on `avbroot`.
 
 !!! The author disclaims responsibility. Everything you do you do on your own at your own peril and risk.
